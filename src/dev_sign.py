@@ -16,7 +16,7 @@ import jwt
 import json
 from collections import namedtuple
 from ecdsa import SigningKey, NIST256p
-from datetime import datetime
+from datetime import datetime, timedelta
 import os.path
 import optparse
 import sys
@@ -36,7 +36,7 @@ DeviceRegister = namedtuple('DeviceRegister',
                              'pubKey'])
 
 def reg_2_jwt(reg_data, priv_key):
-    claims = {'iss': reg_data, 'nbf': datetime.utcnow() }
+    claims = {'iss': reg_data._asdict(), 'nbf': datetime.utcnow() }
     return jwt.encode(claims, priv_key, algorithm='ES256')
 
 def gen_key():
@@ -87,7 +87,11 @@ def load_keys():
     return sk,vk
 
 def data_2_jwt(data_to_sign, reg_data, priv_key):
-    claims = {'data': data_to_sign, 'iss': reg_data, 'nbf': datetime.utcnow() }
+    td = timedelta(minutes=2)
+    exp = datetime.utcnow() + td
+    claims = {'data': data_to_sign, 'iss': reg_data._asdict(),
+              'nbf': datetime.utcnow(),
+              'exp':exp }
     return jwt.encode(claims, priv_key, algorithm='ES256')
 
 
