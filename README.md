@@ -1,7 +1,8 @@
 devreg-py
 =========
 
-Device Registration and signing utility application in Python.
+Device Registration and signing utility application in Python. This
+software is currently in ***ALPHA*** -- consult the issue list.
 
 # Installing
 
