@@ -103,6 +103,9 @@ def create_reg_keys():
     return sk,vk
 
 def load_keys():
+    '''
+    Loads the keys from disk or creates a new key pair if that is needed.
+    '''
     if not os.path.isfile(sk_file):
         return create_reg_keys()
 
@@ -112,6 +115,13 @@ def load_keys():
     return sk,vk
 
 def data_2_jwt(data_to_sign, reg_data, priv_key):
+    '''
+    Returns a JWT encoded blob with data in the claim.
+    '''
+
+    # 2 minutes seems like a reasonable time, especially when running
+    # on a device with NTP. However, there probably needs to be some
+    # more elaborate time synch logic to expand the usage to other devices.
     td = timedelta(minutes=2)
     exp = datetime.utcnow() + td
     claims = {'data': data_to_sign, 'iss': reg_data._asdict(),
