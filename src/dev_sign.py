@@ -36,17 +36,27 @@ DeviceRegister = namedtuple('DeviceRegister',
                              'pubKey'])
 
 def reg_2_jwt(reg_data, priv_key):
+    '''
+    Returns the JWT encoding of the registration data.
+
+    Args:
+    reg_data (Named tuple): Contains the claim to be signed.
+    priv_key: The P256 ECDSA Private Key
+    '''
+
     claims = {'iss': reg_data._asdict(), 'nbf': datetime.utcnow() }
     return jwt.encode(claims, priv_key, algorithm='ES256')
 
 def gen_key():
     return SigningKey.generate(curve=NIST256p)
 
-def getserial():
-    # Extract serial from cpuinfo file
-    # Taken from
-    # http://www.raspberrypi-spy.co.uk/2012/09/getting-your-raspberry-pi-serial-number-using-python/
-    # Obviously, this needs to be generalized for those not on a Pi
+def get_cpu_serial():
+    '''
+    Extract serial from cpuinfo file
+    Taken from http://bit.ly/1xcGKTn
+    Obviously, this needs to be generalized for platforms not the Pi
+    '''
+
     cpuserial = "0000000000000000"
     try:
         f = open('/proc/cpuinfo','r')
@@ -60,15 +70,30 @@ def getserial():
     return cpuserial
 
 def get_crypto_serial():
+    '''
+    Returns the serial number of the crypto device or all zeros for a
+    software-only implementation.
+    '''
+
     # For now just return the 18 char (72 bit) value of all zeros to
     # indicate software keys
     return '000000000000000000'
 
 def build_dev_reg_data(get_pub_key_func):
+    '''
+    Returns a tuple of data about the device which forms the key
+    registration data.
+    '''
     return DeviceRegister('1',
-                          get_crypto_serial(), getserial(), get_pub_key_func())
+                          get_crypto_serial(),
+                          get_cpu_serial(),
+                          get_pub_key_func())
 
 def create_reg_keys():
+    '''
+    Returns new a ECDSA key pair. As a side effect it writes the
+    software-only keys to disk.
+    '''
     sk = gen_key()
     open(sk_file, 'w').write(sk.to_pem())
 
